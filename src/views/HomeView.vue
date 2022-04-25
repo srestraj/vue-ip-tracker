@@ -1,18 +1,85 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div class="flex flex-col h-screen max-h-screen">
+    <!-- Search & Results -->
+    <div class="z-20 flex justify-center relative px-4 pt-8 pb-32 bg-hero-pattern bg-cover">
+
+      <!-- search input -->
+      <div class="w-full max-w-screen-small">
+        <h1 class="text-white text-center text-3xl pb-4">IP Address Tracker</h1>
+
+        <div class="flex">
+          <input v-model="queryIP" type="text" class="flex-1 py-3 px-3 rounded-tl-md rounded-bl-md focus:outline-none" placeholder="Search for any IP address or leave empty to get your IP info" @keyup.enter="getIPInfo">
+
+          <i class="cursor-pointer bg-black text-white px-4 rounded-tr-md rounded-br-md fas fa-chevron-right flex items-center" @click="getIPInfo"></i>
+        </div>
+      </div>
+
+      <!-- IP Info -->
+      <IPInfo v-if="ipInfo" :ipInfo="ipInfo" />
+    </div>
+
+    <!-- map -->
+     <div id="map" class="h-full z-10"></div>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import IPInfo from '@/components/IPInfo'
+import leaflet from 'leaflet'
+import { onMounted, ref } from 'vue'
+import axios from 'axios'
 
 export default {
   name: 'HomeView',
   components: {
-    HelloWorld
+    IPInfo
+  },
+  setup() {
+    let newMap;
+    const queryIP = ref('')
+    const ipInfo = ref(null)
+    const apiKey = process.env.VUE_APP_MAPBOX_ACCESS_TOKEN
+    const geoIPKey = process.env.VUE_APP_GEO_IP
+
+    onMounted(() => {
+      newMap = leaflet.map('map').setView([27.7172, 85.3240], 13);
+      leaflet.tileLayer(`https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${apiKey}`, {
+          attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+          maxZoom: 18,
+          id: 'mapbox/streets-v11',
+          tileSize: 512,
+          zoomOffset: -1,
+          accessToken: `${apiKey}`
+      }).addTo(newMap);
+    })
+
+    const getIPInfo = async () => {
+      try {
+        const response = await axios.get(`https://geo.ipify.org/api/v1?apiKey=${geoIPKey}&ipAddress=${queryIP.value}`)
+        const result = response.data
+        ipInfo.value = {
+          address: result.ip,
+          state: result.location.region,
+          timezone: result.location.timezone,
+          isp: result.isp,
+          lat: result.location.lat,
+          lng: result.location.lng
+        }
+        leaflet.marker([ipInfo.value.lat, ipInfo.value.lng]).addTo(newMap)
+        newMap.setView([ipInfo.value.lat, ipInfo.value.lng], 13)
+      } catch(error) {
+        alert(error.message)
+      }
+    }
+
+    return {
+      queryIP,
+      ipInfo,
+      getIPInfo,
+      apiKey,
+      geoIPKey
+    }
   }
 }
 </script>

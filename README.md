@@ -1,4 +1,4 @@
-# iptracker
+# IP Address Location Tracker with Vue 3, Mapbox and Leaflet
 
 ## Project setup
 ```
