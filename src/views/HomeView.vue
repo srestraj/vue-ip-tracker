@@ -5,7 +5,7 @@
 
       <!-- search input -->
       <div class="w-full max-w-screen-sm">
-        <h1 class="text-white text-center text-3xl pb-4">IP Address Tracker</h1>
+        <h1 class="text-white text-center text-2xl pb-4">IP Address Tracker</h1>
 
         <div class="flex">
           <span class="cursor-pointer bg-black text-white px-4 rounded-tl-md rounded-bl-md flex items-center" @click="getCurrentIP">
@@ -52,7 +52,8 @@ export default {
     var loading = false
 
     onMounted(() => {
-      newMap = leaflet.map('map').setView([27.7172, 85.3240], 13);
+      newMap = leaflet.map('map', { zoomControl: false }).setView([27.7172, 85.3240], 13)
+
       leaflet.tileLayer(`https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${apiKey}`, {
           attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
           maxZoom: 18,
@@ -77,7 +78,7 @@ export default {
           lng: result.location.lng
         }
         leaflet.marker([ipInfo.value.lat, ipInfo.value.lng]).addTo(newMap)
-        newMap.setView([ipInfo.value.lat, ipInfo.value.lng], 13)
+        newMap.setView([ipInfo.value.lat, ipInfo.value.lng], 16)
         loading = false
       } catch(error) {
         alert(error.message)
