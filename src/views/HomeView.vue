@@ -48,8 +48,8 @@ export default {
     const ipInfo = ref(null)
     const apiKey = process.env.VUE_APP_MAPBOX_ACCESS_TOKEN
     const geoIPKey = process.env.VUE_APP_GEO_IP
-    var currentLocationLoading = false
-    var loading = false
+    let currentLocationLoading = ref(false)
+    let loading = ref(false)
 
     onMounted(() => {
       newMap = leaflet.map('map', { zoomControl: false }).setView([27.7172, 85.3240], 13)
@@ -65,7 +65,7 @@ export default {
     })
 
     const getIPInfo = async () => {
-      loading = true
+      loading.value = true
       try {
         const response = await axios.get(`https://geo.ipify.org/api/v1?apiKey=${geoIPKey}&ipAddress=${queryIP.value}`)
         const result = response.data
@@ -79,24 +79,24 @@ export default {
         }
         leaflet.marker([ipInfo.value.lat, ipInfo.value.lng]).addTo(newMap)
         newMap.setView([ipInfo.value.lat, ipInfo.value.lng], 16)
-        loading = false
+        loading.value = false
       } catch(error) {
         alert(error.message)
-        loading = false
+        loading.value = false
       }
     }
 
     const getCurrentIP = async () => {
-      currentLocationLoading = true
+      currentLocationLoading.value = true
       try {
         const response = await axios.get(`https://api.ipify.org/?format=json`)
         const currentIP = response.data.ip
         queryIP.value = currentIP
         getIPInfo()
-        currentLocationLoading = false
+        currentLocationLoading.value = false
       } catch(error) {
         alert(error.message)
-        currentLocationLoading = false
+        currentLocationLoading.value = false
       }
     }
 
